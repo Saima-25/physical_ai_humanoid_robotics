@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: Documentation Search API
+  description: API for searching documentation content in the Hakathon Robotics AI Book
+  version: 1.0.0
+servers:
+  - url: https://api.hakathon-robotics-book.com
+    description: Production server
+  - url: https://staging-api.hakathon-robotics-book.com
+    description: Staging server
+
+paths:
+  /search:
+    get:
+      summary: Search documentation content
+      description: Search across all documentation pages for relevant content
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: Search query string
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results to return
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+        - name: category
+          in: query
+          required: false
+          description: Filter results by documentation category
+          schema:
+            type: string
+        - name: difficulty
+          in: query
+          required: false
+          description: Filter results by difficulty level
+          schema:
+            type: string
+            enum: [beginner, intermediate, advanced]
+      responses:
+        '200':
+          description: Successful search response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SearchResult'
+                  total:
+                    type: integer
+                    description: Total number of results available
+                  took:
+                    type: number
+                    description: Time taken for the search in milliseconds
+        '400':
+          description: Invalid query parameters
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    SearchResult:
+      type: object
+      required:
+        - id
+        - title
+        - url
+        - content_preview
+        - score
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the document
+        title:
+          type: string
+          description: Title of the documentation page
+        url:
+          type: string
+          description: Relative URL to the documentation page
+        content_preview:
+          type: string
+          description: Preview of the matching content with highlights
+        score:
+          type: number
+          description: Relevance score of the result
+        category:
+          type: string
+          description: Category of the documentation
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          description: Difficulty level of the content
+        last_updated:
+          type: string
+          format: date-time
+          description: Last updated timestamp of the document
